@@ -16,7 +16,7 @@ class Crypto:
         """
         self.signing_key = nacl.signing.SigningKey(seed=seed.encode('UTF-8')).generate()  # PRIVATE KEY ARRRRR MATEY
         self.verify_key = self.signing_key.verify_key  # PUBLIC KEY
-        self.box = nacl.secret.SecretBox(key=group_key.encode('UTF-8'))
+        self.box = nacl.secret.SecretBox(group_key)#.encode('UTF-8'))
 
     def gen_signature(self, timestamp):
         """
@@ -26,7 +26,7 @@ class Crypto:
         """
         return self.signing_key.sign(timestamp.encode(encoding='UTF-8'))
 
-    def verify(self, signed, timestamp):
+    def verify(self, signed):
         """
         Verify a signed message
         :param signed: Signed version of timestamp
@@ -34,12 +34,12 @@ class Crypto:
         :return: Bytes or None (The NaCL package writers really like exceptions...)
         """
         try:
-            return self.verify_key.verify(signed, timestamp)
+            return self.verify_key.verify(signed)
         except BadSignatureError as e:
             print("UNVERIFIED MESSAGE! {}".format(e))
             return None
 
-    def encrypt(self, message):
+    def simple_encrypt(self, message):
         """
         Encrypts a message using the Group key
         :param message: Serialized message
@@ -48,11 +48,11 @@ class Crypto:
         nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
         return self.box.encrypt(message, nonce), nonce
 
-    def decrypt(self, message, nonce):
+    def simple_decrypt(self, message):
         """
         Decrypts a message using the Group key
         :param message: Serialized message
         :param nonce:
         :return:
         """
-        return self.box.decrypt(message, nonce)
+        return self.box.decrypt(message)
