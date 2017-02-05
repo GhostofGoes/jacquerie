@@ -5,6 +5,7 @@ from crypto import Crypto
 import nacl.secret as lol
 from input import get_chat_message, get_password
 from json import loads, dumps
+from time import time
 
 
 def serialize(message):
@@ -22,18 +23,28 @@ def main():
     blacklist = {}  # List of signatures that we drop message from
 
     while chatting:
-        plaintext_message = get_chat_message(private=False)
-
         # Ultimately, a message is composed of thus:
         #   Plaintext message
         #   Timestamp in Unix Epoch time
         #   Signature (timestamp encrypted with private key)
         #   Nonce
 
+        plaintext = str(get_chat_message(private=False))  # Unicode String
+        timestamp = str(time())  # Unix Epoch time
+        packed_message = serialize({"message": plaintext, "timestamp": timestamp})
+
         # As sent across wire:
         #   Encrypted payload
         #   Nonce
         #   Signature
+        enc = crypt.encrypt(packed_message)
+        package = {}
+        package["payload"] = enc[0]
+        package["nonce"] = enc[1]
+        package["signature"] = crypt.gen_signature(timestamp)
+
+        packet = serialize(package)
+
 
 
 
