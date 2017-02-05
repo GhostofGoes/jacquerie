@@ -17,10 +17,11 @@ def deserialize(message):
     return loads(message)
 
 
-def build_message(message, crypt):
+def build_message(message, handle, crypt):
     """
     Builds a message to send to a group
     :param message: Plaintext of message being sent
+    :param handle: Handle of message being sent
     :param crypt: Crypto class object
     :return: Serialized packet containing: encrypted payload, nonce, signature
     """
@@ -30,9 +31,8 @@ def build_message(message, crypt):
     #   Signature (timestamp encrypted with private key)
     #   Nonce
 
-    plaintext = message
     timestamp = str(time())  # Unix Epoch time
-    packed_message = serialize({"message": plaintext, "timestamp": timestamp})
+    packed_message = serialize({"message": message, "handle": handle, "timestamp": timestamp})
 
     # As sent across wire:
     #   Encrypted payload
@@ -54,16 +54,32 @@ def unpack_message(message, crypt, blacklist):
     :param blacklist: Dictionary of signatures to ignore
     :return: Deserialized message as dict containing: message, timestamp, signature, (HANDLE??), (LETTER NAME??)
     """
+
+    # Deserialize message into a dict
     package = deserialize(message)
+
+    # Check if signature is in the blacklist
     if package["signature"] in blacklist:
-        print("(DEBUG) Invalid message received") # TODO: debugging
+        print("(DEBUG) Blacklisted message received!")  # TODO: debugging
         return {}  # EMPTY DICT FOR INVALID MESSAGES
 
+    # Decrypt payload
+    dec = crypt.decrypt(cyphertext=package["payload"], nonce=package["nonce"])
+
+    # Deserialize decrypted payload into a dict
+    unpacked = deserialize(dec)
+
+    # Verify signature
+    crypt.verify(signed=package["signature"], timestamp=unpacked["timestamp"])
+
+    return unpacked
 
 
 def main():
     crypt = Crypto(seed=get_password("Enter your private key: "),
                    group_key=get_password("Enter the group key of length {}: ".format(lol.SecretBox.KEY_SIZE)))
+    handle = get_password("Enter a handle you want to be known as: ")
+
     chatting = True
     blacklist = {}  # List of signatures that we drop message from
 
@@ -73,6 +89,10 @@ def main():
         plaintext = str(get_chat_message(private=False))  # Unicode String
         packet = build_message(message=plaintext, crypt=crypt)
         send_message(packet)
+
+        received_msg = get_message()
+        good = unpack_message(received_msg, crypt, blacklist)
+        print("")
 
 
 if __name__ == '__main__':

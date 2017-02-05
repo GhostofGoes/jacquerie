@@ -5,6 +5,7 @@ import nacl.encoding
 import nacl.signing
 import nacl.secret
 import nacl.utils
+from nacl.exceptions import BadSignatureError
 
 
 class Crypto:
@@ -13,10 +14,10 @@ class Crypto:
         :param seed: Password used to seed the signing key
         :param group_key: Group key used to encrypt and decrypt messages
         """
-        self.signing_key = nacl.signing.SigningKey(seed=seed).generate()
-        self.group_key = group_key
+        self.signing_key = nacl.signing.SigningKey(seed=seed).generate()  # PRIVATE KEY ARRRRR MATEY
+        self.verify_key = self.signing_key.verify_key  # PUBLIC KEY
         assert len(group_key) == nacl.secret.SecretBox.KEY_SIZE
-        self.box = nacl.secret.SecretBox(key=group_key)
+        self.box = nacl.secret.SecretBox(key=group_key.encode('UTF-8'))
 
     def gen_signature(self, timestamp):
         """
@@ -25,6 +26,19 @@ class Crypto:
         :return:
         """
         return self.signing_key.sign(timestamp.encode(encoding='UTF-8'))
+
+    def verify(self, signed, timestamp):
+        """
+        Verify a signed message
+        :param signed: Signed version of timestamp
+        :param timestamp: Plaintext timestamp to compare against
+        :return: Bytes or None (The NaCL package writers really like exceptions...)
+        """
+        try:
+            return self.verify_key.verify(signed, timestamp)
+        except BadSignatureError as e:
+            print("UNVERIFIED MESSAGE! {}".format(e))
+            return None
 
     def encrypt(self, message):
         """
