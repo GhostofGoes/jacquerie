@@ -9,7 +9,8 @@ from pickle import loads, dumps
 from time import time
 from com import send_message, get_message
 from datetime import datetime
-from time import ctime
+import socket, sys
+
 
 def serialize(message):
     return dumps(message)
@@ -80,6 +81,9 @@ def unpack_message(message, crypt, blacklist):
 
 
 def main():
+    chatting = True
+    blacklist = {}  # List of signatures that we drop messages from
+
     # group_key = get_password("Enter the group key of length {}: ".format(lol.SecretBox.KEY_SIZE))
     group_key = nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
     seed = get_password("Enter your private key: ")
@@ -88,13 +92,14 @@ def main():
     handle = get_password("Enter a handle you want to be known as: ")
     print("Chat format: (Handle : Letter(s)) [Timestamp] Message")
 
-    chatting = True
-    blacklist = {}  # List of signatures that we drop messages from
-
     while chatting:
-        # TODO: chat output format
-        plaintext = str(get_chat_message(private=False))  # Unicode String
-        packet = build_message(message=plaintext, handle=handle, crypt=crypt)
+        try:
+            plaintext = get_chat_message(private=False)  # Unicode String
+        except KeyboardInterrupt:
+            print("\nSecurely exiting...")
+            break
+
+        packet = build_message(message=str(plaintext), handle=handle, crypt=crypt)
         send_message(packet)
 
         received_msg = packet # get_message()
