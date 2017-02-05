@@ -9,7 +9,9 @@ from pickle import loads, dumps
 from time import time
 from com import send_message, get_message
 from datetime import datetime
-import socket, sys
+
+
+# TODO: docopt for command line arguments
 
 
 def serialize(message):
@@ -84,8 +86,8 @@ def main():
     chatting = True
     blacklist = {}  # List of signatures that we drop messages from
 
-    # group_key = get_password("Enter the group key of length {}: ".format(lol.SecretBox.KEY_SIZE))
-    group_key = nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
+    group_key = get_password("Enter the group key of length {}: ".format(nacl.secret.SecretBox.KEY_SIZE))
+    # group_key = nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
     seed = get_password("Enter your private key: ")
     crypt = Crypto(seed, group_key)
 

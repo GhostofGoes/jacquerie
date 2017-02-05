@@ -16,7 +16,7 @@ class Crypto:
         """
         self.signing_key = nacl.signing.SigningKey(seed=seed.encode('UTF-8')).generate()  # PRIVATE KEY ARRRRR MATEY
         self.verify_key = self.signing_key.verify_key  # PUBLIC KEY
-        self.box = nacl.secret.SecretBox(group_key)#.encode('UTF-8'))
+        self.box = nacl.secret.SecretBox(group_key.encode('UTF-8'))
 
     def gen_signature(self, timestamp):
         """
