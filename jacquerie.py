@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from crypto import Crypto
-import nacl.secret as lol
 import nacl.utils
 import nacl.secret
 from user_input import get_chat_message, get_password
-# from json import loads, dumps
 from pickle import loads, dumps
 from time import time
 from com import send_message, get_message
-
+from datetime import datetime
+from time import ctime
 
 def serialize(message):
     return dumps(message)
@@ -96,13 +95,17 @@ def main():
         # TODO: chat output format
         plaintext = str(get_chat_message(private=False))  # Unicode String
         packet = build_message(message=plaintext, handle=handle, crypt=crypt)
-        # send_message(packet)
+        send_message(packet)
 
         received_msg = packet # get_message()
         good = unpack_message(received_msg, crypt, blacklist)
         # TODO: determine letters from signatures
         temp_letters = "Q"
-        print("({0} : {1}) [{2}] {3}".format(good["handle"], temp_letters, good["timestamp"], good["message"]))
+        message_time = datetime.utcfromtimestamp(int(float(good["timestamp"]))).strftime('%H:%M:%S')
+        message_text = eval(good["message"])
+        message_text = str(message_text["Message"])
+        print("({0} : {1}) [{2}] {3}".format(good["handle"], temp_letters,
+                                             message_time, message_text))
 
 
 if __name__ == '__main__':
