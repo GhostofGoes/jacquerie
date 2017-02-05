@@ -3,7 +3,7 @@
 
 from crypto import Crypto
 import nacl.secret as lol
-from input import get_chat_message, get_password
+from user_input import get_chat_message, get_password
 from json import loads, dumps
 from time import time
 from com import send_message, get_message
@@ -13,6 +13,7 @@ def serialize(message):
     return dumps(message, ensure_ascii=False)
 
 
+# todo: POSSIBLE DECODE?
 def deserialize(message):
     return loads(message)
 
@@ -79,20 +80,22 @@ def main():
     crypt = Crypto(seed=get_password("Enter your private key: "),
                    group_key=get_password("Enter the group key of length {}: ".format(lol.SecretBox.KEY_SIZE)))
     handle = get_password("Enter a handle you want to be known as: ")
+    print("Chat format: (Handle : Letter(s)) [Timestamp] Message")
 
     chatting = True
     blacklist = {}  # List of signatures that we drop message from
 
     while chatting:
-        # TODO: ability for user to set handle
         # TODO: chat output format
         plaintext = str(get_chat_message(private=False))  # Unicode String
-        packet = build_message(message=plaintext, crypt=crypt)
+        packet = build_message(message=plaintext, crypt=crypt, handle=handle)
         send_message(packet)
 
         received_msg = get_message()
         good = unpack_message(received_msg, crypt, blacklist)
-        print("")
+        # TODO: determine letters from signatures
+        temp_letters = "Q"
+        print("({0} : {1}) [{2}] {3}".format(good["handle"], temp_letters, good["timestamp"], good["message"]))
 
 
 if __name__ == '__main__':

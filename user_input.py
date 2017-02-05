@@ -11,7 +11,7 @@
 
     Timestamp will be the GMT at the time the message is received. """
 
-from time import time, gmtime, asctime
+from time import time
 from getpass import getpass
 
 
@@ -25,7 +25,6 @@ def get_chat_message(private=True):
         msgpkt["Message"] = input("Enter Message: ")
 
     # get time-stamp for message
-    # msgpkt["Timestamp"] = asctime(gmtime(time()))
     msgpkt["Timestamp"] = time()  # Unix epoch time
 
     # pass data to next module !! Currently print function for testing.
