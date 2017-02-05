@@ -2,15 +2,15 @@
 
 """ input will be created as a dict.
         Name: msgpkt
-    
+
     will create 2 fields.
         Message:
         Timestamp:
-    
+
     Message will be an input from the user using getpass to maintain security.
-    
+
     Timestamp will be the GMT at the time the message is received. """
-    
+
 from time import time, gmtime, asctime
 from getpass import getpass
 
@@ -32,5 +32,5 @@ def get_chat_message(private=True):
     return msgpkt
 
 
-def get_password():
-    return getpass("Enter your private key: ")
+def get_password(prompt):
+    return getpass(prompt)

@@ -3,22 +3,35 @@
 
 import nacl.encoding
 import nacl.signing
+import nacl.secret
 
 
 class Crypto:
-    def __init__(self, seed):
+    def __init__(self, seed, group_key):
         """
         :param seed: Password used to seed the signing key
+        :param group_key: Group key used to encrypt and decrypt messages
         """
-        assert type(seed) is tuple
         self.signing_key = nacl.signing.SigningKey(seed=seed).generate()
+        self.group_key = group_key
+        assert len(group_key) == nacl.secret.SecretBox.KEY_SIZE
+        self.box = nacl.secret.SecretBox(key=group_key)
 
-    def add_signature(self, message):
+
+    def gen_signature(self, timestamp):
         """
         Adds digital signature to a message by encrypting timestamp with private key
-        :param message: Message
+        :param timestamp: String of timestamp
         :return:
         """
-        assert type(message) is dict
-        message["signature"] = self.signing_key.sign(message["timestamp"].encode(encoding='UTF-8'))
-        return message
+        return self.signing_key.sign(timestamp.encode(encoding='UTF-8'))
+
+    def encrypt(self, message, timestamp, signature):
+        """
+        Encrypts a message using the Group key
+        :param message:
+        :return:
+        """
+        encrypted = {}
+        encrypted["signature"] = signature
+        return encrypted

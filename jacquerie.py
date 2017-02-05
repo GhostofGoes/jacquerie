@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from crypto import Crypto
-import input
+from input import get_chat_message, get_password
 
 
 def main():
-    crypt = Crypto(seed=input.get_password())
+    crypt = Crypto(seed=get_password("Enter your private key: "),
+                   group_key=get_password("Enter the group key: "))
     chatting = True
     while chatting:
-        input.get_chat_message(private=False)
+        msg = get_chat_message(private=False)
 
 
 if __name__ == '__main__':
