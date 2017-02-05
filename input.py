@@ -14,14 +14,23 @@
 from time import time, gmtime, asctime
 from getpass import getpass
 
-def tacos():
+
+def get_chat_message(private=True):
     msgpkt = {}
 
     # get user input
-    msgpkt["Message"] = getpass("Enter Message:")
+    if private:
+        msgpkt["Message"] = getpass("Enter Message: ")
+    else:
+        msgpkt["Message"] = input("Enter Message: ")
 
     # get time-stamp for message
-    msgpkt["Timestamp"] = asctime(gmtime(time()))
+    # msgpkt["Timestamp"] = asctime(gmtime(time()))
+    msgpkt["Timestamp"] = time()  # Unix epoch time
 
     # pass data to next module !! Currently print function for testing.
-    return(msgpkt)
+    return msgpkt
+
+
+def get_password():
+    return getpass("Enter your private key: ")
