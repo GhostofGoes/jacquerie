@@ -4,6 +4,7 @@
 import nacl.encoding
 import nacl.signing
 import nacl.secret
+import nacl.utils
 
 
 class Crypto:
@@ -17,7 +18,6 @@ class Crypto:
         assert len(group_key) == nacl.secret.SecretBox.KEY_SIZE
         self.box = nacl.secret.SecretBox(key=group_key)
 
-
     def gen_signature(self, timestamp):
         """
         Adds digital signature to a message by encrypting timestamp with private key
@@ -26,12 +26,20 @@ class Crypto:
         """
         return self.signing_key.sign(timestamp.encode(encoding='UTF-8'))
 
-    def encrypt(self, message, timestamp, signature):
+    def encrypt(self, message):
         """
         Encrypts a message using the Group key
-        :param message:
+        :param message: Serialized message
+        :return: Tuple of Ciphertext and Nonce
+        """
+        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+        return self.box.encrypt(message, nonce), nonce
+
+    def decrypt(self, message, nonce):
+        """
+        Decrypts a message using the Group key
+        :param message: Serialized message
+        :param nonce:
         :return:
         """
-        encrypted = {}
-        encrypted["signature"] = signature
-        return encrypted
+        return self.box.decrypt(message, nonce)
