@@ -14,9 +14,8 @@ class Crypto:
         :param seed: Password used to seed the signing key
         :param group_key: Group key used to encrypt and decrypt messages
         """
-        self.signing_key = nacl.signing.SigningKey(seed=seed).generate()  # PRIVATE KEY ARRRRR MATEY
+        self.signing_key = nacl.signing.SigningKey(seed=seed.encode('UTF-8')).generate()  # PRIVATE KEY ARRRRR MATEY
         self.verify_key = self.signing_key.verify_key  # PUBLIC KEY
-        assert len(group_key) == nacl.secret.SecretBox.KEY_SIZE
         self.box = nacl.secret.SecretBox(key=group_key.encode('UTF-8'))
 
     def gen_signature(self, timestamp):

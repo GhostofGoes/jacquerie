@@ -3,14 +3,16 @@
 
 from crypto import Crypto
 import nacl.secret as lol
+import nacl.utils
 from user_input import get_chat_message, get_password
-from json import loads, dumps
+# from json import loads, dumps
+from pickle import loads, dumps
 from time import time
 from com import send_message, get_message
 
 
 def serialize(message):
-    return dumps(message, ensure_ascii=False)
+    return dumps(message) #, ensure_ascii=False)
 
 
 # todo: POSSIBLE DECODE?
@@ -65,7 +67,7 @@ def unpack_message(message, crypt, blacklist):
         return {}  # EMPTY DICT FOR INVALID MESSAGES
 
     # Decrypt payload
-    dec = crypt.decrypt(cyphertext=package["payload"], nonce=package["nonce"])
+    dec = crypt.decrypt(package["payload"], package["nonce"])
 
     # Deserialize decrypted payload into a dict
     unpacked = deserialize(dec)
@@ -88,10 +90,10 @@ def main():
     while chatting:
         # TODO: chat output format
         plaintext = str(get_chat_message(private=False))  # Unicode String
-        packet = build_message(message=plaintext, crypt=crypt, handle=handle)
+        packet = build_message(message=plaintext, handle=handle, crypt=crypt)
         send_message(packet)
 
-        received_msg = get_message()
+        received_msg = packet # get_message()
         good = unpack_message(received_msg, crypt, blacklist)
         # TODO: determine letters from signatures
         temp_letters = "Q"
